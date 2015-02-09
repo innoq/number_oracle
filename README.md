@@ -32,8 +32,6 @@ As is customary, this API will and your software should ignore any additional JS
 
 To submit a number to game's oracle as the next step you make, you obviously need to know that game's oracle URI and the parameter's `B` and `D`.
 
-**TODO JSON schema or jazz like that**
-
 An example submission for `B = 6` and `D = 4` might be
 
     { "submission": [0, 5, 1, 1] }
@@ -105,6 +103,8 @@ The individual URIs given will differ from team to team, but the set of hidden c
 The same team may enter the same competition again, with a new software version. But doing so demotes that team to "training mode". This is so people don't start playing contests twice, using the set of numbers they saw the first time for short-cuts the second time.
 
 We may eventually support contests with "evil" oracles.
+
+To be future-proof, your client should not assume that all games in a certain contest share common `base` and `length` values.  Instead, it should fire a HTTP GET against each individual oracle URI, which will provide those values (as described above).
 
 ## How to run
 
