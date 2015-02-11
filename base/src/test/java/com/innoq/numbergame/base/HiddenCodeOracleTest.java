@@ -47,8 +47,10 @@ public class HiddenCodeOracleTest {
         Oracle oracle = OracleFactory.makeOracleFromHiddenCode(hidden, base);
         assertEquals(hidden.length, oracle.getLength());
         assertEquals(base, oracle.getBase());
+        assertEquals(Oracle.OracleType.FAIR, oracle.getType());
         OracleResult result = oracle.divinate(attempt);
         assertEquals(shouldFull, result.getFullMatchCount());
         assertEquals(shouldPartial, result.getPartialMatchCount());
+        assertEquals(hidden, oracle.iGiveUp());
     }
 }

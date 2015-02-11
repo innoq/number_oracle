@@ -9,6 +9,8 @@ class FixedCodeOracle(hiddenCode: Array[Int], base: Int) extends Oracle {
   val length = hiddenCode.length
   def getBase(): Int = base
   def getLength(): Int = length
+  def getType(): Oracle.OracleType = Oracle.OracleType.FAIR
+  def iGiveUp(): Array[Int] = hiddenCode
 
   private def countColors(digits: Array[Int]): Array[Int] = {
     val result = new Array[Int](base)

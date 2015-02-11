@@ -8,6 +8,8 @@ package com.innoq.numbergame.baseapi;
  */
 public interface Oracle {
 
+    public enum OracleType {NICE, FAIR, EVIL};
+
     /**
        The valid digits are <code>0 .. getBase()-1</code> inclusively.
      */
@@ -27,4 +29,12 @@ public interface Oracle {
        individual entry being a valid digit.
      */
     public OracleResult divinate(int[] digits);
+
+    /**
+     * For debugging, return the hidden code.
+     * (A hidden code, in the case of an evil oracle.)
+     */
+    public int[] iGiveUp();
+
+    public OracleType getType();
 }
