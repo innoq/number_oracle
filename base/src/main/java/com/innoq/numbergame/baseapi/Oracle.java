@@ -28,7 +28,7 @@ public interface Oracle {
        @param digits A vector of length <code>getLength()</code>, each
        individual entry being a valid digit.
      */
-    public OracleResult divinate(int[] digits);
+    public OracleResult divinate(int[] digits) throws BadAttemptException;
 
     /**
      * For debugging, return the hidden code.

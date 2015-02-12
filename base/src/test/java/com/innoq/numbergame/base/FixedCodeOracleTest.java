@@ -10,12 +10,12 @@ import java.util.LinkedList;
 import static org.junit.Assert.*;
 
 /**
-   Simple test for the Oracle that's based on a plain hidden test.
+   Simple test for the oracles that are based on a plain hidden test.
  */
 @RunWith(Parameterized.class)
-public class HiddenCodeOracleTest {
+public class FixedCodeOracleTest {
 
-    @Parameters(name="HiddenCodeOracleTest row {index}")
+    @Parameters(name="FixedCodeOracleTest row {index}")
     public static Collection<Object[]> testData() {
         LinkedList<Object[]> result = new LinkedList<>();
         result.add(new Object[]{new int[]{0,1,2,2,4}, new int[]{0,1,2,2,4}, 5, 5, 0});
@@ -34,7 +34,7 @@ public class HiddenCodeOracleTest {
     private final int shouldFull;
     private final int shouldPartial;
 
-    public HiddenCodeOracleTest(int hidden[], int attempt[], int base, int shouldFull, int shouldPartial) {
+    public FixedCodeOracleTest(int hidden[], int attempt[], int base, int shouldFull, int shouldPartial) {
         this.hidden = hidden;
         this.attempt = attempt;
         this.base = base;
@@ -43,7 +43,7 @@ public class HiddenCodeOracleTest {
     }
 
     @Test
-    public void test() {
+    public void test() throws BadAttemptException {
         Oracle oracle = OracleFactory.makeOracleFromHiddenCode(hidden, base);
         assertEquals(hidden.length, oracle.getLength());
         assertEquals(base, oracle.getBase());

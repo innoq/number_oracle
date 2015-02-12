@@ -12,20 +12,30 @@ class FixedCodeOracle(hiddenCode: Array[Int], base: Int) extends Oracle {
   def getType(): Oracle.OracleType = Oracle.OracleType.FAIR
   def iGiveUp(): Array[Int] = hiddenCode
 
-  private def countColors(digits: Array[Int]): Array[Int] = {
+  private def countColors(digits: Array[Int], err: Int => Unit): Array[Int] = {
     val result = new Array[Int](base)
-    digits.foreach((d:Int) => result(d)+=1)
+    digits.foreach((d:Int) => 
+      if(0 <= d && d < base) result(d) += 1
+      else err(d))
     result
   }
 
-  /** Cache this to be a bit faster when called several times, with different attempts. */
-  val hiddenCodeColors = countColors(hiddenCode)
+  /** Cache this, to be a bit faster when called several times, with different attempts. */
+  val hiddenCodeColors = countColors(
+    hiddenCode, (badDigit: Int) => 
+      throw new IllegalArgumentException("Bad digit " + badDigit + " in hidden code"))
 
   def divinate(attempt: Array[Int]): OracleResult = {
+    if (attempt.length != hiddenCode.length)
+       throw new BadAttemptException("Expecting " + hiddenCode.length + " in your attempt, found " + attempt.length)
     var fullMatches = 0
     (hiddenCode zip attempt).foreach {
       case (dh:Int, da:Int) => if(dh == da) fullMatches += 1 }
-    val attemptColors = countColors(attempt)
+    val attemptColors = 
+      countColors(
+        attempt, 
+        (badDigit: Int) => throw new BadAttemptException
+          ("Bad digit " + badDigit + " found in your attempt, expecting 0 .. " + base))
     var colorMatches = 0
     (hiddenCodeColors zip attemptColors).foreach {
       case(a:Int, b:Int) => colorMatches += (if(a < b)  a else b) }
