@@ -15,6 +15,7 @@ syntax: glob
 .scala_dependencies
 .metadata
 .cache
+.externalToolBuilders
 
 # idea
 .idea
