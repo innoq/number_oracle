@@ -1,8 +1,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.innoq.number-game</groupId>
+  <parent>
+    <groupId>com.innoq.number-game</groupId>
+    <artifactId>number-guessing-umbrella</artifactId>
+    <version>0.3-SNAPSHOT</version>
+  </parent>
   <artifactId>base</artifactId>
-  <version>0.1-SNAPSHOT</version>
   <name>${project.artifactId}</name>
   <description>Base functionality for number determination game.</description>
   <inceptionYear>2015</inceptionYear>
@@ -12,7 +15,6 @@
       <url>http://www.apache.org/licenses/LICENSE-2.0</url>
     </license>
   </licenses>
-
   <properties>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>

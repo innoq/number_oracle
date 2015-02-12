@@ -13,6 +13,8 @@ syntax: glob
 .project
 .manager
 .scala_dependencies
+.metadata
+.cache
 
 # idea
 .idea
@@ -39,3 +41,5 @@ build.log
 
 #SHITTY output not in target directory
 build.log
+
+eclipse-classes

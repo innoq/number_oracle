@@ -1,13 +1,11 @@
 package com.innoq.numbergame.base;
 
-import org.junit.*;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
-import com.innoq.numbergame.baseapi.*;
-import java.util.Collection;
-import java.util.LinkedList;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+
+import org.junit.Test;
+
+import com.innoq.numbergame.baseapi.BadAttemptException;
+import com.innoq.numbergame.baseapi.Oracle;
 
 /**
    Simple error handling test for the oracles that are based on a plain hidden test.

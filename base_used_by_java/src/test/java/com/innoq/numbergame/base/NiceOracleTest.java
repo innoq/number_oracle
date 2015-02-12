@@ -1,13 +1,14 @@
 package com.innoq.numbergame.base;
 
-import org.junit.*;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
-import com.innoq.numbergame.baseapi.*;
-import java.util.Collection;
-import java.util.LinkedList;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Test;
+
+import com.innoq.numbergame.baseapi.BadAttemptException;
+import com.innoq.numbergame.baseapi.Oracle;
+import com.innoq.numbergame.baseapi.OracleResult;
 
 /**
    Simple test for the nice oracle.
@@ -31,7 +32,7 @@ public class NiceOracleTest {
         assertEquals(4, oracle.getLength());
         assertEquals(6, oracle.getBase());
         assertEquals(Oracle.OracleType.NICE, oracle.getType());
-        OracleResult result = oracle.divinate(new int[] {0,6,3,3});
+        oracle.divinate(new int[] {0,6,3,3});
     }
 
     @Test(expected = BadAttemptException.class)
@@ -40,7 +41,7 @@ public class NiceOracleTest {
         assertEquals(4, oracle.getLength());
         assertEquals(6, oracle.getBase());
         assertEquals(Oracle.OracleType.NICE, oracle.getType());
-        OracleResult result = oracle.divinate(new int[] {0,4,3,-1});
+        oracle.divinate(new int[] {0,4,3,-1});
     }
 
     @Test(expected = BadAttemptException.class)
@@ -49,7 +50,7 @@ public class NiceOracleTest {
         assertEquals(3, oracle.getLength());
         assertEquals(6, oracle.getBase());
         assertEquals(Oracle.OracleType.NICE, oracle.getType());
-        OracleResult result = oracle.divinate(new int[] {0,4,3,-1});
+        oracle.divinate(new int[] {0,4,3,-1});
     }
 
     @Test(expected = BadAttemptException.class)
@@ -58,7 +59,7 @@ public class NiceOracleTest {
         assertEquals(5, oracle.getLength());
         assertEquals(6, oracle.getBase());
         assertEquals(Oracle.OracleType.NICE, oracle.getType());
-        OracleResult result = oracle.divinate(new int[] {0,4,3,-1});
+        oracle.divinate(new int[] {0,4,3,-1});
     }
 
     @Test(expected = BadAttemptException.class)
