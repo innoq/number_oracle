@@ -7,9 +7,9 @@ import scala.collection._
  * Permutes the numbers 0 .. base-1
  */
 class Permutation(base: Int) {
-  val forward: Array[Int] = {
-    val result: Array[Int]  = new Array[Int](base)
-    val unmapped: mutable.ArrayBuffer[Int]  = new mutable.ArrayBuffer[Int](base)
+  val forward = {
+    val result  = new Array[Int](base)
+    val unmapped  = new mutable.ArrayBuffer[Int](base)
     result.indices.foreach(unmapped += _)
     result.indices.foreach((x: Int) => {
       val r: Random = new Random()
@@ -18,8 +18,8 @@ class Permutation(base: Int) {
     })
     result
   }
-  val reverse:Array[Int] = {
-    val result: Array[Int] = new Array[Int](base) 
+  val reverse = {
+    val result = new Array[Int](base) 
     result.indices.foreach((i: Int) => result(forward(i)) = i)
     result
   }

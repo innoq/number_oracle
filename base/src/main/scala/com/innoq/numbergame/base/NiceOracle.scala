@@ -6,13 +6,13 @@ import com.innoq.numbergame.baseapi._
  * A straightforward oracle, that always lets you win on first attempt.
  */
 class NiceOracle(length: Int, base: Int) extends Oracle {
-  def getBase(): Int = base
-  def getLength(): Int = length
-  def getType(): Oracle.OracleType = Oracle.OracleType.NICE
+  override def getBase() = base
+  override def getLength() = length
+  override def getType() = Oracle.OracleType.NICE
 
   var firstAttempt: Option[Array[Int]] = None
 
-  def iGiveUp(): Array[Int] = {
+  override def iGiveUp() = {
     firstAttempt match {
       case None => {
         val firstAttemptRaw = new Array[Int](length)
@@ -25,7 +25,7 @@ class NiceOracle(length: Int, base: Int) extends Oracle {
     }
   }
 
-  def divinate(attempt: Array[Int]): OracleResult = {
+  override def divinate(attempt: Array[Int]) = {
     firstAttempt match {
       case None => {
         attempt.foreach((d: Int) => if(d < 0 || base <= d)

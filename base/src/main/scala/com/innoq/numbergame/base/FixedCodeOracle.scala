@@ -7,10 +7,11 @@ import com.innoq.numbergame.baseapi._
  */
 class FixedCodeOracle(hiddenCode: Array[Int], base: Int) extends Oracle {
   val length = hiddenCode.length
-  def getBase(): Int = base
-  def getLength(): Int = length
-  def getType(): Oracle.OracleType = Oracle.OracleType.FAIR
-  def iGiveUp(): Array[Int] = hiddenCode
+
+  override def getBase() = base
+  override def getLength() = length
+  override def getType() = Oracle.OracleType.FAIR
+  override def iGiveUp() = hiddenCode
 
   private def countColors(digits: Array[Int], err: Int => Unit): Array[Int] = {
     val result = new Array[Int](base)
@@ -25,7 +26,7 @@ class FixedCodeOracle(hiddenCode: Array[Int], base: Int) extends Oracle {
     hiddenCode, (badDigit: Int) => 
       throw new IllegalArgumentException("Bad digit " + badDigit + " in hidden code"))
 
-  def divinate(attempt: Array[Int]): OracleResult = {
+  override def divinate(attempt: Array[Int]) = {
     if (attempt.length != hiddenCode.length)
        throw new BadAttemptException("Expecting " + hiddenCode.length + " in your attempt, found " + attempt.length)
     var fullMatches = 0
@@ -38,7 +39,7 @@ class FixedCodeOracle(hiddenCode: Array[Int], base: Int) extends Oracle {
           ("Bad digit " + badDigit + " found in your attempt, expecting 0 .. " + base))
     var colorMatches = 0
     (hiddenCodeColors zip attemptColors).foreach {
-      case(a:Int, b:Int) => colorMatches += (if(a < b)  a else b) }
+      case(a:Int, b:Int) => colorMatches += (if(a < b) a else b) }
     new OracleResult(fullMatches, colorMatches - fullMatches)
   }
 }
