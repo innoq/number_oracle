@@ -1,0 +1,17 @@
+logs
+project/project
+project/target
+target
+tmp
+.history
+dist
+/.idea
+/*.iml
+/out
+/.idea_modules
+/.classpath
+/.project
+/RUNNING_PID
+/.settings
+# This one comes from the activator installation, no need to version it:
+activator-launch-1.2.12.jar
