@@ -2,3 +2,8 @@ This is your new Play application
 =================================
 
 This file will be packaged with your application, when using `activator dist`.
+
+
+curls:
+
+(unset http_proxy; curl -v --data-binary '{"base": 3, "length": 7, "oracle_type": "fair"}' -H 'Content-Type: application/json; charset=utf-8' -H 'Accept: application/*' http://localhost:9000/newgame)

@@ -15,3 +15,4 @@ dist
 /.settings
 # This one comes from the activator installation, no need to version it:
 activator-launch-1.2.12.jar
+/bin/
