@@ -139,6 +139,28 @@ There is sample code in the JUnit test `base_used_by_java/src/test/java/com/inno
     export CLASSPATH
     java org.junit.runner.JUnitCore com.innoq.numbergame.base.RandomOracleTest
 
+###
+
+Install PostgreSQL on your machine, or somewhere where you have access.
+
+Initialize a database and a database user by running the `psql` command, as the postgres admin user (or some other admin user), and type at the SQL prompt:
+
+    CREATE ROLE number_oracle_db_user LOGIN PASSWORD 'xxx';
+    CREATE DATABASE number_oracle_db;
+    \q
+
+Next, stil as the DB admin user, run
+
+    psql -d number_oracle_db -a --variable=ON_ERROR_STOP=true -f create_db_postgres.sql
+
+Back as the user that will be running the application, set that password as
+an environment value:
+
+    NUMBER_ORACLE_DB_PASSWORD=xxx
+    export NUMBER_ORACLE_DB_PASSWORD
+
+Hopefully, you changed the `xxx` password to something more complicated.
+
 ### Running the server
 
 A server that aims to implement the above protocol (not yet fully functional)
@@ -149,8 +171,5 @@ can be run as follows:
 * Copy `activator-launch-1.2.12.jar` to `oracle-rest-api`.
 * Create a directory `oracle-rest-api/lib` if it's not already there,
   and copy `base/target/base-0.3-SNAPSHOT.jar` to that directory.
-* Install PostgreSQL on your machine, or somewhere where you have access.
-* Initialize a database via (TOBEDONE).
-* (TOBEDONE)
 
 TODO: This need to be somewhat more automated.
