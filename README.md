@@ -72,9 +72,22 @@ There are three types of oracles:
 
 Post, to the contest creation URI, JSON like so:
 
-    { "base": 6, "length": 4, "oracle_type": "fair", "games": 100 }
+    { "base": 6, "length": 4, "oracle_type": "fair", "games": 100}
 
-In response to this request, you'll be redirected to a contest watch URI.  A GET to that URI returns JSON like so:
+You can also split a contest to work with several oracles.  Each oracle needs to provide a game-maing URI as above.  This could be particularily interesting to make several evil oracles compete:
+
+    {
+      "base": 6, "length": 4, "oracle_type": "evil", 
+      "games_per_orclefactory": 10,
+      "oraclefactories": [
+         "(game-making-URI 1)",
+         "(game-making-URI 2)",
+         ...
+         "(game-making-URI n)"
+      ]
+    }
+
+In response to a contest creation request, you'll be redirected to a contest watch URI.  A GET to that URI returns JSON like this:
 
     {
        "self": "http...(content watch URI)",
@@ -85,7 +98,7 @@ In response to this request, you'll be redirected to a contest watch URI.  A GET
        "games": 100
     }
 
-A team (or individual software developer) may enter the content by posting JSON to the content entry URI like so:
+A team or individual software developer may enter the content by posting JSON to the content entry URI like so:
 
     {
         "team_name": "(your team name)",
@@ -94,18 +107,35 @@ A team (or individual software developer) may enter the content by posting JSON 
 
 Both team name and software version string should be 20 characters or less.
 
-The response will be JSON containing many (in this case, 100) individual oracle URIs, each as described above.
+The response will be JSON containing individual oracle URIs, each as described above.
 
     { "oracle_URIs": [ "http...", "http...", ... ] }
 
 The individual URIs given will differ from team to team, but the set of hidden codes will remain the same (not necessarily in the same order, though).
 
-The same team may enter the same competition again, with a new software version. But doing so demotes that team to "training mode". This is so people don't start playing contests twice, using the set of numbers they saw the first time for short-cuts the second time.
-
-We may eventually support contests with "evil" oracles.
+The same team may enter the same competition again, with a new software version. Doing so demotes that team to "training mode". This is so people don't start playing contests twice, using the set of numbers they saw the first time for short-cuts the second time.
 
 To be future-proof, your client should not assume that all games in a certain contest share common `base` and `length` values.  Instead, it should fire a HTTP GET against each individual oracle URI, which will provide those values (as described above).
 
 ## How to run
 
-No code yet. At this point in time an API description is all that's available.  So you cannot run.
+* Install Java 8
+* Install Maven
+* Have a clone of this repository on your local hard drive
+* run `mvn clean install`
+
+### JVM access to basic oracle
+
+Basic oracle functionality can be accessed locally. Your main entrypoint is the static method `makeRandomFairOracle(int length, int base)` in class `com.innoq.numbergame.base.OracleFactory`.
+
+There is sample code in the JUnit test `base_used_by_java/src/test/java/com/innoq/numbergame/base/RandomOracleTest.java` which is run as part of `mvn clean install`. To run it manually at your `bash` prompt, use
+
+    r="$HOME/.m2/repository"
+    CLASSPATH="$r/org/scala-lang/scala-library/2.11.5/scala-library-2.11.5.jar"
+    CLASSPATH="$CLASSPATH:base/target/classes"
+    CLASSPATH="$CLASSPATH:$r/junit/junit/4.12/junit-4.12.jar"
+    CLASSPATH="$CLASSPATH:$r/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar"
+    CLASSPATH="$CLASSPATH:base_used_by_java/target/test-classes"
+    export CLASSPATH
+    java org.junit.runner.JUnitCore com.innoq.numbergame.base.RandomOracleTest
+
