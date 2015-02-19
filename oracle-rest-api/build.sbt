@@ -1,4 +1,4 @@
-name := """rest-accessible-oracle"""
+name := """oracle-rest-api"""
 
 version := "1.0-SNAPSHOT"
 

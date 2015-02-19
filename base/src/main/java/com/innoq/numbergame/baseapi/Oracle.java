@@ -8,7 +8,19 @@ package com.innoq.numbergame.baseapi;
  */
 public interface Oracle {
 
-    public enum OracleType {NICE, FAIR, EVIL};
+    public enum OracleType {
+    	NICE  {
+			@Override
+			public String toLcString() {return "nice";}
+		}, FAIR {
+			@Override
+			public String toLcString() {return "fair";}
+		}, EVIL {
+			@Override
+			public String toLcString() {return "evil";}
+		};
+    	abstract public String toLcString();
+    };
 
     /**
        The valid digits are <code>0 .. getBase()-1</code> inclusively.
