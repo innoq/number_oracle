@@ -10,7 +10,7 @@ class AttemptPermutation(length: Int, base: Int) {
   val positionP = new Permutation(length)
   
   private def check(attempt: Array[Int]): Unit = {
-	  if(attempt.length != length)
+      if(attempt.length != length)
       throw new BadAttemptException("Wrong attempt length, expected " + length + ", found " + attempt.length)
     attempt.foreach {digit => 
       if(digit < 0 || base <= digit)
