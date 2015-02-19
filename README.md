@@ -139,3 +139,18 @@ There is sample code in the JUnit test `base_used_by_java/src/test/java/com/inno
     export CLASSPATH
     java org.junit.runner.JUnitCore com.innoq.numbergame.base.RandomOracleTest
 
+### Running the server
+
+A server that aims to implement the above protocol (not yet fully functional)
+can be run as follows:
+
+* The the stuff in "How to run" above.
+* Install Play, or, more precisely, unzip `typesafe-activator-1.2.12.zip` .
+* Copy `activator-launch-1.2.12.jar` to `oracle-rest-api`.
+* Create a directory `oracle-rest-api/lib` if it's not already there,
+  and copy `base/target/base-0.3-SNAPSHOT.jar` to that directory.
+* Install PostgreSQL on your machine, or somewhere where you have access.
+* Initialize a database via (TOBEDONE).
+* (TOBEDONE)
+
+TODO: This need to be somewhat more automated.
