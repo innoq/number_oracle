@@ -1,14 +1,18 @@
 package controllers
 
-import play.api.mvc.Controller
-import play.api.mvc.Action
+import scala.annotation.implicitNotFound
+import com.innoq.numbergame.baseapi.Oracle.OracleType.EVIL
+import com.innoq.numbergame.baseapi.Oracle.OracleType.FAIR
+import com.innoq.numbergame.baseapi.Oracle.OracleType.NICE
+import controllers.json.GetAsInt.getAsArray
 import controllers.json.GetAsInt.getAsInt
-import play.api.libs.json.JsString
-import com.innoq.numbergame.baseapi.Oracle.OracleType._
 import controllers.json.UnexpectedJsonException
-import play.api.libs.json.Json
+import json.MapToJsonResult.mapToJsonResult
+import play.api.libs.json.JsString
+import play.api.mvc.Action
+import play.api.mvc.Controller
 import service.OracleService
-import scala.collection.immutable.Map
+import com.innoq.numbergame.baseapi.BadAttemptException
 
 object OracleController extends Controller {
 
@@ -24,7 +28,7 @@ object OracleController extends Controller {
         case JsString("fair") => FAIR
         case JsString("nice") => NICE
         case JsString("evil") => EVIL
-        case _ => throw new UnexpectedJsonException("Need a top-level attribute \"oracle_type\": with value \"fair\" or \"nice\" (or \"evil\")") 
+        case _ => throw new UnexpectedJsonException("Need a top-level attribute \"oracle_type\": with value \"fair\" or \"nice\" or \"evil\"") 
 			  }
 			  val oracleId = OracleService.newOracle(base, length, oracleType)
 				Redirect(controllers.routes.OracleController.oracle(oracleId))
@@ -35,20 +39,37 @@ object OracleController extends Controller {
 	  }
   }
 
-  def oracle(id : Int) = Action {
+  def oracle(id : Long) = Action {
     request => try {
       if ( ! request.acceptedTypes.exists(_ accepts "application/json")) {
         BadRequest("You need to accept application/json")
       } else {
-        val result = OracleService.get(id).mapValues { any => any match {
-          case i:Int => Json.toJson(i)
-          case s:String => Json.toJson(s)
-          case x => throw new IllegalStateException("Found " + x.getClass().getName())
-        }} + ("self" -> Json.toJson(request.uri))
-        Ok(Json.toJson(result))
+        OracleService.get(id) match {
+          case Some(map) => mapToJsonResult(map, Some(request.uri), this)
+          case None => NotFound("No oracle with id " + id + " in database.")  
+        }
       }
     } catch {
       case ex: Throwable => InternalServerError(ex.getMessage)
     }
+  }
+
+  def divinate(id : Long) = Action(parse.json) {(
+    request => try {
+      if ( ! request.acceptedTypes.exists(_ accepts "application/json")) {
+        BadRequest("You need to accept application/json")
+      } else {
+        val body = request.body
+        val submission = getAsArray(body, "submission")
+        OracleService.divinate(id, submission) match {
+          case Some(map) => mapToJsonResult(map, None, this)
+          case None => NotFound("No oracle with id " + id + " in database.")
+        }
+      }
+    } catch {
+    case ex: UnexpectedJsonException => BadRequest(ex.getMessage)
+    case ex: BadAttemptException => BadRequest(ex.getMessage)
+    case ex: Throwable => InternalServerError(ex.getMessage)
+    })
   }
 }

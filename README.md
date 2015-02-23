@@ -126,6 +126,8 @@ To be future-proof, your client should not assume that all games in a certain co
 
 ### JVM access to basic oracle
 
+This is a side line.  If you want the real thing, just skip to the next paragraph and set up the database.
+
 Basic oracle functionality can be accessed locally. Your main entrypoint is the static method `makeRandomFairOracle(int length, int base)` in class `com.innoq.numbergame.base.OracleFactory`.
 
 There is sample code in the JUnit test `base_used_by_java/src/test/java/com/innoq/numbergame/base/RandomOracleTest.java` which is run as part of `mvn clean install`. To run it manually at your `bash` prompt, use
@@ -139,11 +141,11 @@ There is sample code in the JUnit test `base_used_by_java/src/test/java/com/inno
     export CLASSPATH
     java org.junit.runner.JUnitCore com.innoq.numbergame.base.RandomOracleTest
 
-###
+### Create database
 
-Install PostgreSQL on your machine, or somewhere where you have access.
+Install PostgreSQL on your machine.
 
-Initialize a database and a database user by running the `psql` command, as the postgres admin user (or some other admin user), and type at the SQL prompt:
+Initialize a database and a database user by running the `psql` command, as the `postgres` admin user (or some other admin user), and type at the SQL prompt:
 
     CREATE ROLE number_oracle_db_user LOGIN PASSWORD 'xxx';
     CREATE DATABASE number_oracle_db;
@@ -159,17 +161,74 @@ an environment value:
     NUMBER_ORACLE_DB_PASSWORD=xxx
     export NUMBER_ORACLE_DB_PASSWORD
 
-Hopefully, you changed the `xxx` password to something more complicated.
+(Hopefully, you changed the `xxx` password to something more complicated.)
 
 ### Running the server
 
 A server that aims to implement the above protocol (not yet fully functional)
 can be run as follows:
 
-* The the stuff in "How to run" above.
+* Do the stuff in "How to run" above.
+* Do the stuff in "Create the database" above.
 * Install Play, or, more precisely, unzip `typesafe-activator-1.2.12.zip` .
-* Copy `activator-launch-1.2.12.jar` to `oracle-rest-api`.
+* Copy `activator-launch-1.2.12.jar` to the directory `oracle-rest-api` here.
 * Create a directory `oracle-rest-api/lib` if it's not already there,
   and copy `base/target/base-0.3-SNAPSHOT.jar` to that directory.
+* In the directory `oracle-rest-api` (having the `NUMBER_ORACLE_DB_PASSWORD` environment varialbe set as above), run `./activator start` to fire up the server.
 
 TODO: This need to be somewhat more automated.
+
+### Trying it out
+
+Create a new nice oracle with
+
+    curl -v --data-binary '{"base": 6, "length": 4, "oracle_type": "nice"}' \
+    -H 'Content-Type: application/json; charset=utf-8' \
+    -H 'Accept: application/json' http://localhost:9000/neworacle
+
+This should return a `303 See Other` with a `Location: ` header giving the URI of the newly created nice oracle.
+
+If this is the first thing you ever did,
+`/oracle/1` would be that URI.  Do a `GET` to that
+location as often as you like:
+
+    curl -v -H 'Accept: application/*' http://localhost:9000/oracle/1
+
+This should give you `200 OK` with a JSON body containing at least:
+
+    {"base":6,"length":4,"self":"/oracle/1","type":"nice"}
+
+You can guess (as it's a _nice_ oracle, it'll always let you succeed on your first try):
+
+    curl -v --data-binary '{"submission": [0,2,4,5]}' \
+    -H 'Content-Type: application/json; charset=utf-8' \
+    -H 'Accept: application/json' http://localhost:9000/oracle/1
+
+This should give you a `200 OK` and the answer
+
+    {"full_match_count":4,"partial_match_count":0}
+
+Any oracle should be left alone after solved. If you rerun the same POST, you'd deserve, and get, a `400 Bad Request`.
+
+## An example session against a fair oracle
+
+The precise values you get might change.
+
+    curl -v --data-binary '{"base": 6, "length": 4, "oracle_type": "fair"}' \
+    -H 'Content-Type: application/json; charset=utf-8' \
+    -H 'Accept: application/json' http://localhost:9000/neworacle
+
+    ...
+    HTTP/1.1 303 See Other
+    Location: /oracle/2
+    Content-Length: 0
+
+    curl -v -H 'Accept: application/json' http://localhost:9000/oracle/2
+
+    {"self":"/oracle/2","base":6,"length":4,"type":"fair"}
+
+    curl -v --data-binary '{"submission": [0,0,1,2]}' \
+    -H 'Content-Type: application/json; charset=utf-8' \
+    -H 'Accept: application/json' http://localhost:9000/oracle/2
+
+(And then it doesn't presently work, as it doesn't read out BLOBs.)
