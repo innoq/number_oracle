@@ -16,6 +16,7 @@ object MapToJsonResult {
           val jsonMap = map.mapValues {
             any => any match {
             case i:Int => Json.toJson(i)
+            case d:Double => Json.toJson(d)
             case s:String => Json.toJson(s)
             case b: java.lang.Boolean => Json.toJson(b.booleanValue())
             case t:OracleType => Json.toJson(t.toLcString())

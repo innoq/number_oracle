@@ -21,6 +21,12 @@ import com.innoq.numbergame.baseapi.BadAttemptException
 import java.sql.Date
 import org.joda.time.Instant
 import anorm.SqlQuery
+import java.sql.Blob
+import java.io.InputStream
+import org.postgresql.largeobject.BlobInputStream
+import anorm.Column
+import anorm.MetaDataItem
+import anorm.TypeDoesNotMatch
 
 object OracleService {
      
@@ -30,6 +36,17 @@ object OracleService {
       ps.setBytes(i, array)
     }
   }
+  
+  // This, neither (found at http://www.databaseproblem.com/735_14195249/):
+  implicit def rowToByteArray: Column[Array[Byte]] = {
+  Column.nonNull[Array[Byte]] { (value, meta) =>
+    val MetaDataItem(qualified, nullable, clazz) = meta
+    value match {
+      case bytes: Array[Byte] => Right(bytes)
+      case x => Left(TypeDoesNotMatch("Expected bytes here, found " + x.getClass().getName))
+    }
+  }
+}
 
   def newOracle(base: Int, length: Int, oracleType: OracleType) : Long = {
     oracleType match {
@@ -42,7 +59,7 @@ object OracleService {
           on('base -> base, 'length -> length,
               'deserializer -> "FixedCodeOracleSerializer", 'state -> state).executeInsert()
         }) match {
-          case Some(i) => {System.err.println("Habe record id " + i); i}
+          case Some(i) => i
           case None => throw new IllegalStateException("No record id after database insert.")
         }
       }
@@ -78,7 +95,10 @@ object OracleService {
               "solved" -> solved,
 						  "type" -> OracleType.valueOf(row[String]("type").toUpperCase(Locale.ROOT)))
 				  if(row[Boolean]("solved")) {
-            baseResult + ("solved" -> solved)
+            val solvingGuess = row[Instant]("solving_guess")
+            val firstGuess = row[Instant]("first_guess")
+            val duration = (solvingGuess.getMillis - firstGuess.getMillis) * 1e-3
+            (baseResult + ("solved" -> solved) + ("seconds_until_solved" -> duration))
           } else {
             baseResult
           }
@@ -114,10 +134,7 @@ object OracleService {
           } else {
         	  val oracle = deserializer match {
             case "FixedCodeOracleSerializer" => {
-              System.err.println("Going for state.")
-              val state = row[Array[Byte]]("state")
-              System.err.println("Have state: " + state.getClass().getName())
-            	FixedCodeOracleSerializer.unmarshal(state)
+              FixedCodeOracleSerializer.unmarshal(row[Array[Byte]]("state"))
             }
             case whatsit => 
               throw new IllegalStateException("Oracle database record at " + id + " has unsupported deserializer \"" + deserializer + "\"")
@@ -126,25 +143,19 @@ object OracleService {
             TreeMap(
               "full_match_count" -> r.getFullMatchCount, 
               "partial_match_count" -> r.getPartialMatchCount)
-          }
-          System.err.println("Have tree map")
-          val update: SqlQuery = 
-            if(result("full_match_count") == length) {
-            	// They solved the oracle
-            	System.err.println("Solved!")
-            	row.apply[Option[Instant]]("first_guess") match {
-            	case None => SQL("UPDATE oracle SET first_guess = now(), solved = TRUE, solving_guess = first_guess, attempts = {attempts} WHERE id = {id}")
-            	case _ =>    SQL("UPDATE oracle SET solved = TRUE, solving_guess = now(), attempts = {attempts} WHERE id = {id}")
-            	}
-            } else {
-            	System.err.println("Not solved!")
-            	row.apply[Option[Instant]]("first_guess") match {
-            	case None => SQL("UPDATE oracle SET first_guess = now(), attempts = {attempts} WHERE id = {id}")
-            	case _ => SQL("UPDATE oracle SET attempts = {attempts} WHERE id = {id}")
-            	}
-            }
-          System.err.println("Have update statement map")
-          update.on('id -> id, 'attempts -> (attempts + 1)).executeUpdate()
+          } 
+          if(result("full_match_count") == length) {
+        	  // They solved the oracle
+        	  row.apply[Option[Instant]]("first_guess") match {
+        	  case None => SQL("UPDATE oracle SET first_guess = now(), solved = TRUE, solving_guess = first_guess, attempts = {attempts} WHERE id = {id}")
+        	  case _ =>    SQL("UPDATE oracle SET solved = TRUE, solving_guess = now(), attempts = {attempts} WHERE id = {id}")
+        	  }
+          } else {
+        	  row.apply[Option[Instant]]("first_guess") match {
+        	  case None => SQL("UPDATE oracle SET first_guess = now(), attempts = {attempts} WHERE id = {id}")
+        	  case _ => SQL("UPDATE oracle SET attempts = {attempts} WHERE id = {id}")
+        	  }
+          }.on('id -> id, 'attempts -> (attempts + 1)).executeUpdate()
           result
         })
       }}.headOption

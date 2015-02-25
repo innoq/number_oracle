@@ -223,7 +223,11 @@ The precise values you get might change.
     Location: /oracle/2
     Content-Length: 0
 
+Now
+
     curl -v -H 'Accept: application/json' http://localhost:9000/oracle/2
+
+gives
 
     {"self":"/oracle/2","base":6,"length":4,"type":"fair"}
 
@@ -231,4 +235,30 @@ The precise values you get might change.
     -H 'Content-Type: application/json; charset=utf-8' \
     -H 'Accept: application/json' http://localhost:9000/oracle/2
 
-(And then it doesn't presently work, as it doesn't read out BLOBs.)
+In one particular example, I got
+
+    {"full_match_count":0,"partial_match_count":2}
+
+This will of course change each time, as you 
+
+So           `[0,0,1,2]` gave   `{"full_match_count":0,"partial_match_count":2}`.    
+I then asked `[3,4,5,0]` and got `{"full_match_count":2,"partial_match_count":0}`.    
+I then asked `[3,4,2,1]` and got `{"full_match_count":2,"partial_match_count":1}`.    
+I next asked `[2,4,2,0]` and got `{"full_match_count":0,"partial_match_count":1}`.    
+This left    `[3,2,5,1]` as the only possibility, and indeed:
+
+    curl -v --data-binary '{"submission": [3,2,5,1]}' \
+    -H 'Content-Type: application/json; charset=utf-8' \
+    -H 'Accept: application/json' http://localhost:9000/oracle/2
+
+gave (`HTTP/1.1 200 OK` and)
+
+    {"full_match_count":4,"partial_match_count":0}* Closing connection #0
+
+A further
+
+    curl -v -H 'Accept: application/json' http://localhost:9000/oracle/2
+
+gave (`HTTP/1.1 200 OK` and) 
+
+    {"attempts":5,"self":"/oracle/2","solved":true,"base":6,"length":4,"type":"fair"}
