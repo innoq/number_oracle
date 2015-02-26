@@ -5,6 +5,7 @@ import java.sql.PreparedStatement
 import scala.collection.immutable.Map
 import scala.collection.immutable.TreeMap
 import com.innoq.numbergame.base.OracleFactory
+import com.innoq.numbergame.baseapi.OracleResult
 import com.innoq.numbergame.baseapi.Oracle.OracleType
 import com.innoq.numbergame.baseapi.Oracle.OracleType.FAIR
 import com.innoq.numbergame.serialize.FixedCodeOracleSerializer
@@ -129,34 +130,34 @@ object OracleService {
           }
           val attempts = row[Int]("attempts")
           val deserializer = row[String]("deserializer")
-          val result = if("implicit".equals(deserializer)) {
-              TreeMap("full_match_count" -> length, "partial_match_count" -> 0)
+          val r = if("implicit".equals(deserializer)) {
+            new OracleResult(length, 0)
           } else {
-        	  val oracle = deserializer match {
+            val oracle = deserializer match {
             case "FixedCodeOracleSerializer" => {
               FixedCodeOracleSerializer.unmarshal(row[Array[Byte]]("state"))
             }
             case whatsit => 
               throw new IllegalStateException("Oracle database record at " + id + " has unsupported deserializer \"" + deserializer + "\"")
             }
-            val r = oracle.divinate(submission)
-            TreeMap(
-              "full_match_count" -> r.getFullMatchCount, 
-              "partial_match_count" -> r.getPartialMatchCount)
-          } 
-          if(result("full_match_count") == length) {
-        	  // They solved the oracle
-        	  row.apply[Option[Instant]]("first_guess") match {
-        	  case None => SQL("UPDATE oracle SET first_guess = now(), solved = TRUE, solving_guess = first_guess, attempts = {attempts} WHERE id = {id}")
-        	  case _ =>    SQL("UPDATE oracle SET solved = TRUE, solving_guess = now(), attempts = {attempts} WHERE id = {id}")
-        	  }
+            oracle.divinate(submission)
+          }
+          val sql = if(r.getFullMatchCount == length) {
+            // They solved the oracle
+            row.apply[Option[Instant]]("first_guess") match {
+            case None => SQL("UPDATE oracle SET first_guess = now(), solved = TRUE, solving_guess = now(), attempts = {attempts} WHERE id = {id}")
+            case _ =>    SQL("UPDATE oracle SET solved = TRUE, solving_guess = now(), attempts = {attempts} WHERE id = {id}")
+            }
           } else {
-        	  row.apply[Option[Instant]]("first_guess") match {
-        	  case None => SQL("UPDATE oracle SET first_guess = now(), attempts = {attempts} WHERE id = {id}")
-        	  case _ => SQL("UPDATE oracle SET attempts = {attempts} WHERE id = {id}")
-        	  }
-          }.on('id -> id, 'attempts -> (attempts + 1)).executeUpdate()
-          result
+            row.apply[Option[Instant]]("first_guess") match {
+            case None => SQL("UPDATE oracle SET first_guess = now(), attempts = {attempts} WHERE id = {id}")
+            case _ => SQL("UPDATE oracle SET attempts = {attempts} WHERE id = {id}")
+            }
+          }
+          sql.on('id -> id, 'attempts -> (attempts + 1)).executeUpdate()
+          TreeMap(
+            "full_match_count" -> r.getFullMatchCount, 
+            "partial_match_count" -> r.getPartialMatchCount)
         })
       }}.headOption
   }
