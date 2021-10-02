@@ -135,7 +135,7 @@ There is sample code in the JUnit test `base_used_by_java/src/test/java/com/inno
     r="$HOME/.m2/repository"
     CLASSPATH="$r/org/scala-lang/scala-library/2.11.5/scala-library-2.11.5.jar"
     CLASSPATH="$CLASSPATH:base/target/classes"
-    CLASSPATH="$CLASSPATH:$r/junit/junit/4.12/junit-4.12.jar"
+    CLASSPATH="$CLASSPATH:$r/junit/junit/4.13.2/junit-4.13.2.jar"
     CLASSPATH="$CLASSPATH:$r/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar"
     CLASSPATH="$CLASSPATH:base_used_by_java/target/test-classes"
     export CLASSPATH
